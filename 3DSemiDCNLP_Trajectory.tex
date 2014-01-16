@@ -1,0 +1,85 @@
+%%%% Numerical Simulation of Orbital Defense/Attack Game using Semi-Direct Collocation with Nolinear Programming Algorithm
+%% November,2013
+\documentclass[12pt,a4paper,]{article}
+\usepackage[a4paper,left=1.5cm,right=1.5cm, top=2cm,bottom=2.5cm,textwidth=14cm,textheight=21cm]{geometry}
+\usepackage{amsmath,amssymb}
+%\usepackage{hyperref}
+\usepackage{palatino}   %设置字体
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{bm}
+\usepackage{latexsym}
+\usepackage{indentfirst}
+\usepackage{epsfig}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\makeatletter
+\newcommand{\rmnum}[1]{\romannumeral #1}
+\newcommand{\Rmnum}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\makeatother
+%\pagestyle{fancy}
+%\fancyhead[R]{Homework of Mechanics of Plates and Shells}
+%\fancyhead[L]{}
+\pagenumbering{arabic}
+%\setlength{\textwidth}{17cm}
+%\setlength{\textheight}{20cm}
+\setlength\parskip{.5\baselineskip} %设置段落间距
+\setlength\arraycolsep{2pt}
+\renewcommand{\theequation}{\arabic{section}.\arabic{equation}}
+%----------标题---------------------------------------
+\title{Numerical Simulation of Orbital Defense/Attack Game using Semi-Direct Collocation with Nolinear Programming Algorithm}
+\date{}
+
+\begin{document}
+\maketitle
+%-----------第一部分----------------------------------
+\section{GA Preprocessing}
+  In the GA preprocessing, the terminal time $t_f$ and the unknown values of the costates at initial time $t_0$ are chosen as parameters and coded in each individual:
+  \begin{align}
+     &\left\{ \lambda_{11,0},\lambda_{12,0},\lambda_{13,0},\lambda_{14,0},\lambda_{15,0},\lambda_{16,0}, \right. & \notag \\
+     &  \,\,\,\,      \lambda_{21,0},\lambda_{22,0},\lambda_{23,0},\lambda_{24,0},\lambda_{25,0},\lambda_{26,0},         & \notag \\
+     &\left.\,\,\,  \lambda_{31,0},\lambda_{32,0},\lambda_{33,0},\lambda_{34,0},\lambda_{35,0},\lambda_{36,0}, t_f \right\}& \notag
+  \end{align}
+  The objective function in the genetic algorithm as a weighted sum of constraint violations is explicitly given as
+  \begin{equation}
+    \tilde{J} = \sum_{j=1}^{19}{c_j}^2 \notag
+  \end{equation}
+  where the 19 constraints are given as
+  \begin{align}
+    &x_{11,f} - x_{21,f} = 0 & \notag \\
+    &x_{13,f} - x_{23,f} = 0 & \notag \\
+    &x_{14,f} - x_{24,f} = 0 & \notag \\
+    &\lambda_{11,f}+\lambda_{21,f} = - 2x_{21,f} + 2x_{31,f}\big[
+    \cos(x_{24,f})\cos(x_{34,f})\cos(x_{23,f}-x_{33,f})+\sin(x_{24,f})\sin(x_{34,f}) \big] \notag \\
+    &\lambda_{31,f} = - 2x_{31,f} + 2x_{21,f}\big[
+    \cos(x_{24,f})\cos(x_{34,f})\cos(x_{23,f}-x_{33,f})+\sin(x_{24,f})\sin(x_{34,f}) \big] \notag \\
+    &\lambda_{12,f}=\lambda_{22,f}=\lambda_{32,f}=0 \notag \\
+    &\lambda_{13,f}+\lambda_{23,f} = -2x_{21,f}x_{31,f}\cos(x_{24,f})\cos(x_{34,f})\sin(x_{23,f}-x_{33,f}) \notag \\
+    &\lambda_{33,f}                =  2x_{21,f}x_{31,f}\cos(x_{24,f})\cos(x_{34,f})\sin(x_{23,f}-x_{33,f}) \notag \\
+    &\lambda_{14,f}+\lambda_{24,f} = 2x_{21,f}x_{31,f} \big[ -\sin(x_{24,f})\cos(x_{34,f})\cos(x_{23,f}-x_{33,f}) + \cos(x_{24,f})\sin(x_{34,f}) \big]\notag\\
+    &\lambda_{34,f}                = 2x_{21,f}x_{31,f} \big[ -\cos(x_{24,f})\sin(x_{34,f})\cos(x_{23,f}-x_{33,f}) + \sin(x_{24,f})\cos(x_{34,f}) \big]\notag\\
+    &\lambda_{15,f}=\lambda_{25,f}=\lambda_{35,f}=0 \notag \\
+    &\lambda_{16,f}=\lambda_{26,f}=\lambda_{36,f}=0 \notag \\
+    &H_f = 0 \notag
+  \end{align}
+  The state and costate equations are numerically integrated toward the terminal time $t_f$ to evaluate the constraint violations above for each individual, after which all the individuals evolve to produce a new population according to the GA mechanism. After appropriate amounts of evolution, the optimal individual survived such that the initial guess for all the state and costate variables in the time interval $[t_0,t_f]$ are determined. The open source multi-objective GA code developed by Deb et al., applying the so called nondominated sorting genetic algorithm (NSGA-\Rmnum{2}), is employed to provide the initial guess that will yield convergent solution in the Semi-DCNLP algorithm.
+
+
+%-----------第二部分----------------------------------
+\section{Semi-DCNLP Algorithm}
+The extended state vector now contains the state variables of the pursuer, the evader and the target, costate variables of the evader and can be written as
+\begin{align}
+  \tilde{\bm{x}} = &\left\{ r_P,v_P,\theta_P,\phi_P,\gamma_P,\psi_P,r_E,v_E,\theta_E,\phi_E,\gamma_E,\psi_E,
+                     r_T,v_T,\theta_T,\phi_T,\gamma_T,\psi_T,
+                    \hat{\lambda_{21}},\hat{\lambda_{22}},\hat{\lambda_{24}},\hat{\lambda_{25}},\hat{\lambda_{26}} \right\}^T & \notag
+\end{align}
+Note that the state variables of the target at any time can be determined due to its prescribed initial state and no active control being imposed, amongst all its possible finial states, the optimal one minimizes the objective function of the game, making terminal time $t_f$ the implicit effect of the target on the game.
+
+In the semi-DCNLP algorithm, the time interval $[t_0,t_f]$ is divided into $N$ subintervals, $[t_{i-1},t_i],i=1,2,\cdots,N$, then the discrete state variables are solved simultaneously by the NLP solver.
+
+\section{Program Description}
+The MATLAB script file $"SemiDCNLP\_GA.m"$ is the main program that generates the initial guess, which is output in the text file $"NLP\_Input.txt"$, as the input of the NLP solver. Then the fortran coded NLP project $"3DSemiDCNLP"$ generates the final optimal solution for the extended state variables, the control variables of the pursuer until the terminal time $t_f$, which is also provided by the NLP solver. The output of the NLP solver is plotted by the MATLAB script file $"SemiDCNLP\_Trajectory"$ to illustrate the saddle point trajectory.
+
+
+
+\end{document}
